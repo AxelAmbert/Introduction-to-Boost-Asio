@@ -14,9 +14,7 @@
 #include <vector>
 #include <time.h>
 #include <algorithm>
-#include <functional>
 #include <thread>
-
 using boost::asio::ip::tcp;
 
 std::vector<std::string> useless_strings_;
@@ -62,13 +60,19 @@ void modify_a_string(std::string &str) {
 }
 
 void modify_strings() {
-    std::cout << "go " << std::endl;
+    std::cout << "[start]" << std::endl;
     std::for_each(useless_strings_.begin(), useless_strings_.end(), modify_a_string);
-    std::cout << "end " << std::endl;
+    std::cout << "[end]" << std::endl;
 }
 
+
+/*
+ * This function will call 100 times the modify_strings function.
+ * Since the io_service is multi-threaded, it will happens concurrently.
+ * Thus, accessing the same part of the memory at the same time.
+ */
 void thread_attack(boost::asio::io_service &io_service) {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         io_service.post(modify_strings);
     }
 }
@@ -148,7 +152,8 @@ private:
         if (!error)
         {
             new_connection->start();
-            thread_attack(io_service_);
+            //TODO uncomment this line (Task 05)
+            //thread_attack(io_service_);
             start_accept();
 
         }
@@ -158,14 +163,6 @@ private:
     boost::asio::io_service &io_service_;
 };
 
-void enable_multi_threading(int nb_of_thread, boost::asio::io_service &io_service) {
-    for (int i = 0; i < nb_of_thread; ++i) {
-        std::thread thread([&] () {
-            io_service.run();
-        });
-        thread.detach();
-    }
-}
 
 int main()
 {
@@ -176,11 +173,12 @@ int main()
     try
     {
         boost::asio::io_service io_service;
+
         tcp_server server(io_service);
         if constexpr (multi_threading) {
-            enable_multi_threading(10, io_service);
+            //TODO implement multi-threading (Task 04)
+            //enable_multi_threading(10, io_service);
         }
-
         io_service.run();
     }
     catch (std::exception& e)

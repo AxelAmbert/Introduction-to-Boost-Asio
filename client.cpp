@@ -21,16 +21,12 @@ int main(int argc, char* argv[])
         }
 
         boost::asio::io_context io_context;
-
         tcp::resolver resolver(io_context);
         std::cout << argv[1] << std::endl;
-        auto endpoints = tcp::endpoint(boost::asio::ip::address::from_string(argv[1]), 4242);
-
-
-
+        auto endpoints = tcp::endpoint( boost::asio::ip::address::from_string(argv[1]), 4242);
         tcp::socket socket(io_context);
-        socket.connect( tcp::endpoint( boost::asio::ip::address::from_string(argv[1]), 4242));
 
+        socket.connect( endpoints);
         for (;;)
         {
             boost::array<char, 128> buf;
